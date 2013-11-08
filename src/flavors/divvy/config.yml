@@ -36,7 +36,25 @@ place_types:
       - condition: '"{{location_type}}" === "new-suggestion"'
 
         icon:
-          iconUrl: /static/css/images/marker-comment.png
+          iconUrl: /static/css/images/marker-comment-new.png
+          iconSize:
+            width: 21
+            height: 22
+          iconAnchor: [17, 18]
+        focus_icon:
+          iconUrl: /static/css/images/marker-comment-focused.png
+          iconSize:
+            width: 21
+            height: 22
+          iconAnchor: [17, 18]
+
+  original-suggestion:
+    label: _(original station suggestion)
+    rules:
+      - condition: '"{{location_type}}" === "original-suggestion"'
+
+        icon:
+          iconUrl: /static/css/images/marker-comment-original.png
           iconSize:
             width: 21
             height: 22
