@@ -11,6 +11,24 @@ body, select, input, textarea {
 body {
   font-size: 15px;
   -webkit-font-smoothing: antialiased;
+  letter-spacing: 0.05em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: gtPressuraMonoBold, sans-serif;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.125em;
+}
+h4, h5, h6 {
+  font-family: gtPressuraBold, sans-serif;
+  letter-spacing: 1px;
+}
+strong {
+  font-family: gtPressuraBold, sans-serif;
+  font-weight: normal;
+}
+#content {
+  line-height: 1.6;
 }
 
 
@@ -64,10 +82,6 @@ a.add-place:hover {
 #site-header a:active, 
 #site-header a:visited {
   color: #fff;
-  text-transform: uppercase;
-  font-family: gtPressuraBold, sans-serif;
-  font-weight: normal;
-  letter-spacing: 1px;
 }
 #site-header a:hover {
 }
@@ -131,8 +145,21 @@ a#nav-bttn:visited {
 /* =Navigation Menu
 -------------------------------------------------------------- */
 
+.access a {
+  font-family: gtPressuraBold, sans-serif;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.125em;
+}
 .access a:hover {
   background: #1da0d1;
+}
+
+a.auth {
+  font-family: gtPressuraBold, sans-serif;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 
