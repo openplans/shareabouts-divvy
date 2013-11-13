@@ -32,11 +32,13 @@
       {{/if}}
     </strong> suggested this {{# place_type_label }}{{ place_type_label }}{{/ place_type_label}}
                          {{^ place_type_label }}place{{/ place_type_label}}
-    {{#region}}
-      in {{ region }}
-    {{/region}}{{/_}}
+                         {{/_}}
 
-    <time datetime="{{ created_datetime }}" class="response-date">{{ pretty_created_datetime }}</time>
+   {{#eq location_type "original-suggestion" }}
+   <time datetime="{{ created_datetime }}" class="response-date">before the Divvy Rollout</time>
+   {{^}}
+   <time datetime="{{ created_datetime }}" class="response-date">{{ pretty_created_datetime }}</time>
+   {{/eq}}
   </span>
 </header>
 
