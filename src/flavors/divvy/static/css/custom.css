@@ -180,13 +180,62 @@ a.auth {
 }
 
 
+/* =Place Details
+-------------------------------------------------------------- */
+
+.place-header-prompt {
+  display: block;
+  font-size: 0.5em;
+  font-family: gtPressuraBold, sans-serif;
+  letter-spacing: 0.05em;
+}
+.existing-station-name,
+.planned-station-name {
+  padding-left: 50px;
+  background: url(images/marker-station-existing.png) left top no-repeat scroll;
+}
+.planned-station-name {
+  background: url(images/marker-station-planned.png) left top no-repeat scroll;
+}
+.existing-station-details,
+.planned-station-details {
+  display: none;
+}
+.place-items {
+  padding-bottom: 1.5em;
+}
+.place-value-description {
+  font-family: gtPressuraRegular, sans-serif;
+}
+.place-items-new-suggestion .place-item-description:after {
+  content: "I'd use this location for: ";
+  float: left;
+  color: #888;
+  margin-right: 0.5em;
+}
+.place-item-work,
+.place-item-shopping,
+.place-item-fun,
+.place-item-home,
+.place-value-work,
+.place-value-shopping,
+.place-value-fun,
+.place-value-home {
+  display: inline;
+  font-family: gtPressuraRegular, sans-serif;
+}
+.place-item-zip {
+  display: none;
+}
+
+
 /* =Voting & Social Promotion
 -------------------------------------------------------------- */
 
 .promotion {
   background: #fff;
   float: right;
-  margin: 0 0 0.75em 0.75em !important;
+  margin: 0 0 1em 1em !important;
   padding: 37px 0 0;
   position: relative;
   border: 0;

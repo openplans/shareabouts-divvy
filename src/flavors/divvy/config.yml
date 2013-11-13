@@ -121,6 +121,7 @@ place:
       attrs:
         - key: value
           value: new-suggestion
+
     - prompt: _(Your Name)
       type: text
       name: submitter_name
@@ -130,6 +131,7 @@ place:
           value: _(Name)
         - key: size
           value: 30
+
     - prompt: _(Your Email)
       type: text
       name: private-email
@@ -139,32 +141,6 @@ place:
           value: _(Email)
         - key: size
           value: 30
-    - prompt: _(I'd use this location for...)
-      type: hidden
-    - prompt: _(Work/School)
-      type: checkbox
-      name: work
-      attrs:
-        - key: value
-          value: _(Work/School)
-    - prompt: _(Shopping)
-      type: checkbox
-      name: shopping
-      attrs:
-        - key: value
-          value: _(Shopping)
-    - prompt: _(Fun)
-      type: checkbox
-      name: fun
-      attrs:
-        - key: value
-          value: _(Fun)
-    - prompt: _(Home)
-      type: checkbox
-      name: home
-      attrs:
-        - key: value
-          value: _(Home)
 
     - prompt: _(Description)
       type: textarea
@@ -172,6 +148,37 @@ place:
       attrs:
         - key: placeholder
           value: _(Description...)
+
+    - prompt: _(I'd use this location for...)
+      type: hidden
+
+    - prompt: _(Work/School)
+      type: checkbox
+      name: work
+      attrs:
+        - key: value
+          value: _(Work/School)
+
+    - prompt: _(Shopping)
+      type: checkbox
+      name: shopping
+      attrs:
+        - key: value
+          value: _(Shopping)
+
+    - prompt: _(Fun)
+      type: checkbox
+      name: fun
+      attrs:
+        - key: value
+          value: _(Fun)
+
+    - prompt: _(Home)
+      type: checkbox
+      name: home
+      attrs:
+        - key: value
+          value: _(Home)
 
     - prompt: _(Home Zip Code)
       type: text
