@@ -180,6 +180,54 @@ a.auth {
 }
 
 
+/* =Voting & Social Promotion
+-------------------------------------------------------------- */
+
+.promotion {
+  background: #fff;
+  float: right;
+  margin: 0 0 0.75em 0.75em !important;
+  padding: 37px 0 0;
+  position: relative;
+  border: 0;
+}
+
+/* Social Links */
+.social {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 84px;
+}
+.sharing {
+  margin: 0;
+}
+.share-link {
+  float: right;
+  margin-left: 5px;
+}
+
+/* Support */
+#user_support {
+  position: relative;
+  float: none;
+  text-align: right;
+}
+#user_support label {
+  background-color: #3db7e4;
+  font-family: gtPressuraBold, sans-serif;
+  font-weight: normal;
+  color: #fff;
+  box-shadow: -4px 4px 0 rgba(85, 85, 85, 0.5);
+  border-radius: 4px;
+  padding-left: 34px;
+}
+#user_support:hover label {
+  color: #fff;
+  background-color: #1da0d1;
+}
+
+
 /* =Media Queries
 -------------------------------------------------------------- */
 

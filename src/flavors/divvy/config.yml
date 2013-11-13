@@ -166,21 +166,13 @@ place:
         - key: value
           value: _(Home)
 
-
     - prompt: _(Description)
       type: textarea
       name: description
       attrs:
         - key: placeholder
           value: _(Description...)
-    # - prompt: _(Image)
-    #   inputfile_label: _(Add an Image)
-    #   type: file
-    #   name: my_image
-    #   optional: true
-    #   attrs:
-    #     - key: accept
-    #       value: image/*
+
     - prompt: _(Home Zip Code)
       type: text
       name: zip
@@ -216,7 +208,7 @@ survey:
 
 support:
   submission_type: support
-  submit_btn_text: _(Support This!)
+  submit_btn_text: _(Support)
   action_text: supported
   anonymous_name: _(Someone)
 
