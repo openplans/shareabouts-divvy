@@ -224,3 +224,7 @@ pages:
     slug: about
     name: overview
     start_page: true
+
+  - title: _(Go to divvybikes.com)
+    external: true
+    url: https://divvybikes.com/
