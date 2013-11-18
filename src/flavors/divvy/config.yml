@@ -1,11 +1,11 @@
 # Settings for the app
 app:
   # HTML Title
-  title: Chicago Bike Share
+  title: Divvy Suggestion Map
   # Header name
-  name: Chicago Bike Share
+  name: Divvy Suggestion Map
   # Meta description that will show up in Google search results
-  meta_description: _(Chicago Bike Share)
+  meta_description: _(Divvy Suggestion Map. Where do you want bike share stations?)
 
   # When the map loads, existing places will be loaded in chunks. By default,
   # the size of the chunks will be a reasonable default dictated by the API
