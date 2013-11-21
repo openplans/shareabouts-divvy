@@ -1,9 +1,6 @@
 @import url("http://divvybikes.com/assets/css/chicago/fonts.css?c=943941600");
 
-
-/* =Base Typography
--------------------------------------------------------------- */
-
+/* Base Typography */
 body, select, input, textarea {
   color: #000;
   font-family: gtPressuraLight, sans-serif;
@@ -31,158 +28,110 @@ strong {
   line-height: 1.6;
 }
 
-
-/* =Links
--------------------------------------------------------------- */
-
+/* Links */
 a, a:active, a:visited {
   color: #1da0d1;
 }
 a:hover {
   color: #3db7e4;
 }
-
-.bttn, a.bttn:active, a.bttn:visited {
+.btn,
+.btn:visited,
+.btn:link {
   background-color: #3db7e4;
   color: #f0f0f0;
+  font-weight: normal;
   text-shadow: none;
+  border: 0;
   border-radius: 4px;
 }
-.bttn:hover, a.bttn:hover {
+.btn:hover {
   color: #fff;
   background-color: #1da0d1;
 }
+a.close-btn {
+  color: #ff5e99;
+}
 
-a.add-place {
+#add-place-btn-container {
+  background: #eee;
+  border-bottom-color: transparent;
+  border-bottom-color: rgba(0,0,0,0.1);
+}
+#add-place {
   color: #f0f0f0;
   background-color: #1da0d1;
-  text-shadow: none;
-  border-radius: 4px;
-  text-transform: uppercase;
   font-family: gtPressuraBold, sans-serif;
-  font-weight: normal;
   line-height: 1.2;
   letter-spacing: 1px;
 }
-a.add-place:hover {
+#add-place:hover {
   color: #fff;
   background-color: #3db7e4;
 }
 
-
-/* =The Site Header
--------------------------------------------------------------- */
-
+/* Site Header */
 #site-header {
-  color: #fff;
   background-color: #3db7e4;
-  box-shadow: 0 2px 0 #2FCAFC, 0 6px 0 rgba(85, 85, 85, 0.325);
+  border-bottom: 2px solid #2FCAFC;
 }
-#site-header a, 
-#site-header a:active, 
-#site-header a:visited {
+#site-header .btn,
+#site-header .btn:visited,
+#site-header .btn:link {
+  box-shadow: none;
+  border-radius: 0;
   color: #fff;
 }
-#site-header a:hover {
-}
-
-
-/* =Logo
--------------------------------------------------------------- */
-
-#site-title {
-  font-family: gtPressuraBold, sans-serif;
-  font-weight: normal;
-  font-size: 1em;
-  height: 100%;
-  box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  padding: 1em 0;
-}
-#site-title a:link,
-#site-title a:visited {
-  text-shadow: none;
-  font-size: 1em !important;
-  color: #000;
-  display: block;
-  height: 100%;
-  position: relative;
-}
-#site-title a:hover {}
 
 #site-logo {
-  height: 100%;
+  height: 0.75em;
   width: auto;
-  margin-right: 0.5em;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-#site-name {
-  display: none;
+  margin-top: 0.25em;
 }
 
-
-/* =Mobile Navigation Button
--------------------------------------------------------------- */
-
-a#nav-bttn:link,
-a#nav-bttn:visited {
+/* Navigation */
+a#nav-btn:link,
+a#nav-btn:visited {
   background: #1da0d1;
   color: #eee;
   font-family: "Helvetica Neue", Arial, Helvetica, serif;
+  text-shadow: none;
 }
-
-
-/* =Progress Bar
--------------------------------------------------------------- */
-
-.progress-bar span {
-  background: #1da0d1;
-}
-
-
-/* =Navigation Menu
--------------------------------------------------------------- */
-
-.access a {
+.access {
   font-family: gtPressuraBold, sans-serif;
   font-weight: normal;
   text-transform: uppercase;
   letter-spacing: 0.125em;
 }
-.access a:hover {
+#sign-in-btn {
+  color: #fff;
+  font-family: gtPressuraBold, sans-serif;
+  font-weight: normal;
+}
+
+/* Progress Bar */
+.progress-bar span {
   background: #1da0d1;
 }
 
-a.auth {
-  font-family: gtPressuraBold, sans-serif;
-  font-weight: normal;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-
-/* =The Ticker
--------------------------------------------------------------- */
-
+/* The Ticker */
 #ticker {
   background: #eee;
 }
-.recent-points li {
-  border-bottom: 1px solid #ccc;
-}
-.recent-points li:hover {
-  background: #3db7e4;
-}
 .recent-points a {
   color: #333;
+  border-top-color: transparent;
+  border-top-color: rgba(255,255,255,0.5);
+  border-bottom-color: transparent;
+  border-bottom-color: rgba(0,0,0,0.1);
+}
+.recent-points a:hover {
+  background: #3db7e4;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
 }
 
-
-/* =Place Details
--------------------------------------------------------------- */
-
+/* Place Details */
 .place-header-prompt {
   display: block;
   font-size: 0.5em;
@@ -228,90 +177,56 @@ a.auth {
   display: none;
 }
 
-
-/* =Voting & Social Promotion
--------------------------------------------------------------- */
-
-.promotion {
-  background: #fff;
-  float: right;
-  margin: 0 0 1em 1em !important;
-  padding: 37px 0 0;
-  position: relative;
-  border: 0;
-}
-
-/* Social Links */
-.social {
-  position: absolute;
-  top: 0;
-  right: 0;
-  min-width: 84px;
-}
-.sharing {
-  margin: 0;
-}
-.share-link {
-  float: right;
-  margin-left: 5px;
-}
-
-/* Support */
-#user_support {
-  position: relative;
-  float: none;
-  text-align: right;
-}
+/* Voting & Social Promotion */
 #user_support label {
-  background-color: #3db7e4;
+  color: #fff;
+  font-size: 1.25em;
   font-family: gtPressuraBold, sans-serif;
   font-weight: normal;
-  color: #fff;
-  box-shadow: -4px 4px 0 rgba(85, 85, 85, 0.5);
-  border-radius: 4px;
-  padding-left: 34px;
 }
 #user_support:hover label {
+  background-color: #1da0d1; /* match .btn color */
+}
+
+.reply-link {
   color: #fff;
-  background-color: #1da0d1;
+  font-family: gtPressuraBold, sans-serif;
+  font-weight: normal;
+}
+
+/* Powered By */
+#powered-by {
+  letter-spacing: 0;
+  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+}
+a.shareabouts-logo {
+  color: #a3c7d9 !important;
+  font-weight: bold !important;
 }
 
 
 /* =Media Queries
 -------------------------------------------------------------- */
 
-@media only screen and (min-width: 768px) { /* menu is visible */
-  #site-title a:link,
-  #site-title a:visited {
-    padding-left: 8em;
-  }
-}
+@media only screen and (min-width: 60em) {
 
-@media only screen and (min-width: 1024px) { /* ticker is visible */
-  #site-title {
-    padding: 1.25em 0;
-  }
-  #site-name {
-    display: block;
-    font-size: 1.5em;
-    line-height: 1.875;
-    margin-right: 1em;
-  }
-  #site-title a:link,
-  #site-title a:visited {
-    padding-left: 10em;
+  #site-header {
+    padding-left: 3em;
   }
   .access {
-    margin-top: 1.25em;
+    font-size: 1.125em;
   }
-}
+  .access .menu {
+    margin-top: -0.325em;
+  }
+  #site-header .btn,
+  #site-header .btn:visited,
+  #site-header .btn:link {
+    padding-top: 1em;
+    padding-bottom: 1em;
+  }
+  #add-place-btn-container {
+    font-size: 1.75em;
+  }
 
-@media only screen and (min-width: 1300px) {
-  #site-title {
-    padding: 1.625em 0;
-  }
-  #site-title a:link,
-  #site-title a:visited {
-    padding-left: 11em;
-  }
 }
