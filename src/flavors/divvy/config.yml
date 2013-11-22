@@ -132,9 +132,6 @@ place:
         - key: placeholder
           value: _(Description...)
 
-    - prompt: _(I'd use this location for...)
-      type: hidden
-
     - prompt: _(Work/School)
       type: checkbox
       name: work

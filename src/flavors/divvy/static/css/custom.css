@@ -172,6 +172,41 @@ a#nav-btn:visited {
   border-bottom-color: transparent;
 }
 
+/* Forms */
+label {
+  font-size: 0.875em;
+  color: #777;
+  margin-right: 0.125em;
+}
+.checkbox-prompt {
+  margin-bottom: 0;
+}
+.checkbox {
+  display: inline-block;
+  *display: inline;
+  *zoom: 1;
+  margin: 0 1em 0 0;
+}
+.checkbox label {
+  font-family: gtPressuraMonoBold, sans-serif;
+  font-weight: normal;
+}
+.checkbox input {
+  outline: 0;
+}
+.checkbox + .text {
+  margin-top: 1em;
+}
+
+.drag-marker-instructions {
+  font-family: gtPressuraBold, sans-serif;
+  font-weight: normal;
+  font-size: 1em;
+  line-height: 1.25;
+  padding-top: 0.75em;
+  padding-bottom: 0.75em;
+}
+
 /* Place Details */
 .place-header-prompt {
   display: block;
