@@ -1,0 +1,61 @@
+{{#eq location_type "new-suggestion" }}
+{{> place-detail-promotion-bar }}
+{{^}}
+{{/eq}}
+
+{{#eq location_type "original-suggestion" }}
+{{> place-detail-promotion-bar }}
+{{^}}
+{{/eq}}
+
+<header class="place-header">
+  <h1 class="{{location_type}}-name">
+    {{#eq location_type "existing-station" }}
+    <span class="place-header-prompt">Existing Station at</span>
+    {{^}}
+    {{/eq}}
+
+    {{#eq location_type "planned-station" }}
+    <span class="place-header-prompt">Planned Station at</span>
+    {{^}}
+    {{/eq}}
+
+    {{ name }}
+  </h1>
+  <span class="place-submission-details {{location_type}}-details">
+    {{#_}}<strong class="point-submitter">
+      {{#if submitter}}
+        <img src="{{ submitter.avatar_url }}" class="avatar" /> {{ submitter.name }}
+      {{^}}
+        <!-- TODO: FIXME: don't hardcode image URL -->
+        <img src="/static/css/images/user-50.png" class="avatar" /> {{ submitter_name }}
+      {{/if}}
+    </strong> suggested this {{# place_type_label }}{{ place_type_label }}{{/ place_type_label}}
+                         {{^ place_type_label }}place{{/ place_type_label}}
+                         {{/_}}
+
+   {{#eq location_type "original-suggestion" }}
+   <time datetime="{{ created_datetime }}" class="response-date">before the Divvy Rollout</time>
+   {{^}}
+   <time datetime="{{ created_datetime }}" class="response-date">{{ pretty_created_datetime }}</time>
+   {{/eq}}
+  </span>
+</header>
+
+<section class="place-items place-items-{{location_type}} clearfix">
+  {{# attachments }}
+  <div class="place-item place-attachment-{{ name }}">
+    <img src="{{ file }}" class="place-value place-value-{{ name }}" alt="{{ name }}">
+  </div>
+  {{/ attachments }}
+  {{# items }}
+  <div class="place-item place-item-{{ name }}">
+    <span class="place-label place-label-{{ name }}">{{ label }}</span>
+    <p class="place-value place-value-{{ name }}">{{ value }}</p>
+  </div>
+  {{/ items }}
+</section>
+
+{{#survey_config}}
+<section class="survey"></section>
+{{/survey_config}}
