@@ -37,15 +37,11 @@ place_types:
 
         icon:
           iconUrl: /static/css/images/marker-comment-new.png
-          iconSize:
-            width: 21
-            height: 22
+          iconSize: [21, 22]
           iconAnchor: [17, 18]
         focus_icon:
           iconUrl: /static/css/images/marker-comment-focused.png
-          iconSize:
-            width: 21
-            height: 22
+          iconSize: [21, 22]
           iconAnchor: [17, 18]
 
   original-suggestion:
@@ -55,33 +51,24 @@ place_types:
 
         icon:
           iconUrl: /static/css/images/marker-comment-original.png
-          iconSize:
-            width: 21
-            height: 22
+          iconSize: [21, 22]
           iconAnchor: [17, 18]
         focus_icon:
           iconUrl: /static/css/images/marker-comment-focused.png
-          iconSize:
-            width: 21
-            height: 22
+          iconSize: [21, 22]
           iconAnchor: [17, 18]
 
   existing-station:
     label: _(existing station)
     rules:
       - condition: '"{{location_type}}" === "existing-station"'
-
         icon:
           iconUrl: /static/css/images/marker-station-existing.png
-          iconSize:
-            width: 40
-            height: 53
+          iconSize: [40, 53]
           iconAnchor: [21, 49]
         focus_icon:
           iconUrl: /static/css/images/marker-station-focused.png
-          iconSize:
-            width: 40
-            height: 53
+          iconSize: [40, 53]
           iconAnchor: [21, 49]
 
   planned-station:
@@ -91,15 +78,11 @@ place_types:
 
         icon:
           iconUrl: /static/css/images/marker-station-planned.png
-          iconSize:
-            width: 40
-            height: 53
+          iconSize: [40, 53]
           iconAnchor: [21, 49]
         focus_icon:
           iconUrl: /static/css/images/marker-station-focused.png
-          iconSize:
-            width: 40
-            height: 53
+          iconSize: [40, 53]
           iconAnchor: [21, 49]
 
 activity:
