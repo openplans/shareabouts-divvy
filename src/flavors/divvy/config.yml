@@ -131,6 +131,7 @@ place:
       attrs:
         - key: placeholder
           value: _(Description...)
+        - key: required
 
     - prompt: _(Work/School)
       type: checkbox
@@ -189,6 +190,10 @@ survey:
       label: _(Comment)
       type: textarea
       name: comment
+      attrs:
+        - key: placeholder
+          value: _(Your comment...)
+        - key: required
     - prompt: _(Your Name)
       type: text
       name: submitter_name
