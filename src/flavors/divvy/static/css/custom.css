@@ -1,4 +1,45 @@
-@import url("http://divvybikes.com/assets/css/chicago/fonts.css?c=943941600");
+@font-face {
+    font-family: 'gtPressuraBold';
+    src: url('fonts/gt-pressura-bold-web-webfont.eot');
+    src: url('fonts/gt-pressura-bold-web-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/gt-pressura-bold-web-webfont.woff') format('woff'),
+         url('fonts/gt-pressura-bold-web-webfont.ttf') format('truetype'),
+         url('fonts/gt-pressura-bold-web-webfont.svg#gt_pressurabold') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'gtPressuraLight';
+    src: url('fonts/gt-pressura-light-web-webfont.eot');
+    src: url('fonts/gt-pressura-light-web-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/gt-pressura-light-web-webfont.woff') format('woff'),
+         url('fonts/gt-pressura-light-web-webfont.ttf') format('truetype'),
+         url('fonts/gt-pressura-light-web-webfont.svg#gt_pressuralight') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'gtPressuraMonoBold';
+    src: url('fonts/gt-pressura-mono-bold-web-webfont.eot');
+    src: url('fonts/gt-pressura-mono-bold-web-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/gt-pressura-mono-bold-web-webfont.woff') format('woff'),
+         url('fonts/gt-pressura-mono-bold-web-webfont.ttf') format('truetype'),
+         url('fonts/gt-pressura-mono-bold-web-webfont.svg#gt_pressura_monobold') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'gtPressuraRegular';
+    src: url('fonts/gt-pressura-regular-web-webfont.eot');
+    src: url('fonts/gt-pressura-regular-web-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/gt-pressura-regular-web-webfont.woff') format('woff'),
+         url('fonts/gt-pressura-regular-web-webfont.ttf') format('truetype'),
+         url('fonts/gt-pressura-regular-web-webfont.svg#gt_pressuraregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+h1, h2, h3, h4, h5, h6, p { text-rendering: auto; }
+/*@import url("http://divvybikes.com/assets/css/chicago/fonts.css?c=943941600");*/
 
 /* Base Typography */
 body, select, input, textarea {
