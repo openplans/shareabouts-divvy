@@ -31,7 +31,7 @@ map:
 # The values map the place type to map icons (defined below).
 place_types:
   new-suggestion:
-    label: _(new station suggestion)
+    label: _(new station)
     rules:
       - condition: '"{{location_type}}" === "new-suggestion"'
 
@@ -94,7 +94,7 @@ activity:
 place:
   adding_supported: true
   add_button_label: _(Suggest a Location)
-  action_text: _(added)
+  action_text: _(suggested)
   title: _(Tell us more...)
   anonymous_name: _(Someone)
   submit_button_label: _(Submit)
