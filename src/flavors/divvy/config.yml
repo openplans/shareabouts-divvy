@@ -44,20 +44,6 @@ place_types:
           iconSize: [21, 22]
           iconAnchor: [17, 18]
 
-  original-suggestion:
-    label: _(original station suggestion)
-    rules:
-      - condition: '"{{location_type}}" === "original-suggestion"'
-
-        icon:
-          iconUrl: /static/css/images/marker-comment-original.png
-          iconSize: [21, 22]
-          iconAnchor: [17, 18]
-        focus_icon:
-          iconUrl: /static/css/images/marker-comment-focused.png
-          iconSize: [21, 22]
-          iconAnchor: [17, 18]
-
   existing-station:
     label: _(existing station)
     rules:
