@@ -2,6 +2,7 @@
 django<1.6
 # gevent
 gunicorn
+newrelic
 
 # Database
 south
