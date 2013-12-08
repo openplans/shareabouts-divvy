@@ -1,6 +1,6 @@
 # The server
 django<1.6
-# gevent
+gevent
 gunicorn
 newrelic
 
