@@ -222,6 +222,13 @@ if 'GOOGLE_ANALYTICS_ID' in env:
 if 'GOOGLE_ANALYTICS_DOMAIN' in env:
     GOOGLE_ANALYTICS_DOMAIN = env.get('GOOGLE_ANALYTICS_DOMAIN')
 
+if 'ADMINS' in env:
+    ADMINS = [
+        (admin.split('@')[0], admin)
+        for admin in os.environ.get('ADMINS', '').split(',')
+    ]
+
+EMAIL_SUBJECT_PREFIX = '[divvy] '
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = env.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_HOST_PASSWORD = env.get('EMAIL_HOST_PASSWORD', '')
