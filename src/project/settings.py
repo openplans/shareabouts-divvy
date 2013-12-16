@@ -222,6 +222,14 @@ if 'GOOGLE_ANALYTICS_ID' in env:
 if 'GOOGLE_ANALYTICS_DOMAIN' in env:
     GOOGLE_ANALYTICS_DOMAIN = env.get('GOOGLE_ANALYTICS_DOMAIN')
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = env.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_HOST_PASSWORD = env.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_HOST_USER = env.get('EMAIL_HOST_USER', 'your_email@example.com')
+EMAIL_PORT = env.get('EMAIL_PORT', 587)
+EMAIL_USE_TLS = True
+SERVER_EMAIL = EMAIL_HOST_USER
+
 ##############################################################################
 # Local settings overrides
 # ------------------------
