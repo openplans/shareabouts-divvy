@@ -11,9 +11,15 @@ from .config import get_shareabouts_config
 from django.shortcuts import render
 from django.conf import settings
 from django.core.cache import cache
+from django.core.mail import EmailMultiAlternatives
+from django.template import TemplateDoesNotExist, RequestContext
+from django.template.loader import render_to_string
 from django.utils.timezone import now
 from django.views.decorators.csrf import ensure_csrf_cookie
 from proxy.views import proxy_view
+
+
+log = logging.getLogger(__name__)
 
 
 def make_api_root(dataset_root):
@@ -53,21 +59,13 @@ class ShareaboutsApi (object):
 
 
 @ensure_csrf_cookie
-def index(request, default_place_type):
-
+def index(request, place_id=None):
     # Load app config settings
     config = get_shareabouts_config(settings.SHAREABOUTS.get('CONFIG'))
     config.update(settings.SHAREABOUTS.get('CONTEXT', {}))
 
     # Get initial data for bootstrapping into the page.
     api = ShareaboutsApi(dataset_root=settings.SHAREABOUTS.get('DATASET_ROOT'))
-
-    # Handle place types in case insensitive way (park works just like Park)
-    lower_place_types = [k.lower() for k in config['place_types'].keys()]
-    if default_place_type.lower() in lower_place_types:
-        validated_default_place_type = default_place_type
-    else:
-        validated_default_place_type = ''
 
     # Get the content of the static pages linked in the menu.
     pages_config = config.get('pages', [])
@@ -88,9 +86,23 @@ def index(request, default_place_type):
     user_token_json = u'"{0}"'.format(request.session['user_token'])
 
     # Get the browser that the user is using.
-    user_agent_string = request.META['HTTP_USER_AGENT']
-    user_agent = httpagentparser.detect(user_agent_string)
-    user_agent_json = json.dumps(user_agent)
+    user_agent_string = request.META.get('HTTP_USER_AGENT', '')
+    if user_agent_string:
+        user_agent = httpagentparser.detect(user_agent_string)
+        user_agent_json = json.dumps(user_agent)
+    else:
+        # If no user agent is specified, stub a generic one in.
+        user_agent_json = json.dumps({
+            "os": {"name": ""},
+            "browser": {"name": "", "version": None},
+            "platform": {"name": "", "version": None}
+        })
+
+    place = None
+    if place_id:
+        place = api.get('places/' + place_id)
+        if place:
+            place = json.loads(place)
 
     context = {'config': config,
 
@@ -98,12 +110,112 @@ def index(request, default_place_type):
                'pages_config': pages_config,
                'pages_config_json': pages_config_json,
                'user_agent_json': user_agent_json,
-               'default_place_type': validated_default_place_type,
+               # Useful for customized meta tags
+               'place': place,
 
                'API_ROOT': api.root,
                'DATASET_ROOT': api.dataset_root,
                }
+
     return render(request, 'index.html', context)
+
+
+def place_was_created(request, path, response):
+    path = path.strip('/')
+    return (
+        path.startswith('places') and
+        not path.startswith('places/') and
+        response.status_code == 201)
+
+
+def send_place_created_notifications(request, response):
+    config = get_shareabouts_config(settings.SHAREABOUTS.get('CONFIG'))
+    config.update(settings.SHAREABOUTS.get('CONTEXT', {}))
+
+    # Before we start, check whether we're configured to send at all on new
+    # place.
+    should_send = config.get('notifications', {}).get('on_new_place', False)
+    if not should_send:
+        return
+
+    # First, check that we have all the settings and data we need. Do not bail
+    # after each error, so that we can report on all the validation problems
+    # at once.
+    errors = []
+
+    try:
+        # The reuest has any potentially private data fields.
+        requested_place = json.loads(request.body)
+    except ValueError:
+        errors.append('Received invalid place JSON from request: %r' % (request.body,))
+
+    try:
+        # The response has things like ID and cretated datetime
+        place = json.loads(response.content)
+    except ValueError:
+        errors.append('Received invalid place JSON from response: %r' % (response.content,))
+
+    try:
+        from_email = settings.EMAIL_ADDRESS
+    except AttributeError:
+        errors.append('EMAIL_ADDRESS setting must be configured in order to send notification emails.')
+
+    try:
+        email_field = config.get('notifications', {}).get('submitter_email_field', 'submitter_email')
+        recipient_email = requested_place['properties'][email_field]
+    except KeyError:
+        errors.append('No "%s" field found on the place. Be sure to configure the "notifications.submitter_email_field" property if necessary.' % (email_field,))
+
+    # Bail if any errors were found. Send all errors to the logs and otherwise
+    # fail silently.
+    if errors:
+        for error_msg in errors:
+            log.error(error_msg)
+        return
+
+    # If the user didn't provide an email address, then no need to go further.
+    if not recipient_email:
+        return
+
+    # Set optional values
+    bcc_list = getattr(settings, 'EMAIL_NOTIFICATIONS_BCC', [])
+
+    # If we didn't find any errors, then render the email and send.
+    context_data = RequestContext(request, {
+        'place': place,
+        'email': recipient_email,
+        'config': config,
+    })
+    subject = render_to_string('new_place_email_subject.txt', context_data)
+    body = render_to_string('new_place_email_body.txt', context_data)
+
+    try:
+        html_body = render_to_string('new_place_email_body.html', context_data)
+    except TemplateDoesNotExist:
+        html_body = None
+
+    # connection = smtp.EmailBackend(
+    #     host=...,
+    #     port=...,
+    #     username=...,
+    #     use_tls=...)
+
+    # NOTE: In Django 1.7+, send_mail can handle multi-part email with the
+    # html_message parameter, but pre 1.7 cannot and we must construct the
+    # multipart message manually.
+    msg = EmailMultiAlternatives(
+        subject,
+        body,
+        from_email,
+        to=[recipient_email],
+        bcc=bcc_list)#,
+        # connection=connection)
+
+    if html_body:
+        msg.attach_alternative(html_body, 'text/html')
+
+    msg.send()
+    return
 
 
 def api(request, path):
@@ -129,10 +241,15 @@ def api(request, path):
     # Clear cookies from the current domain, so that they don't interfere with
     # our settings here.
     request.META.pop('HTTP_COOKIE', None)
-    return proxy_view(request, url, requests_args={
+    response = proxy_view(request, url, requests_args={
         'headers': headers,
         'cookies': cookies
     })
+
+    if place_was_created(request, path, response):
+        send_place_created_notifications(request, response)
+
+    return response
 
 
 def users(request, path):

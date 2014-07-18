@@ -42,7 +42,7 @@ From the root Shareabouts directory...
 
 * Set your flavor, and dataset API key and root URL:
 
-  You will need your dataset root API URL for this step.  Suppose you are using an API server named *api.shareabouts.org* with a username *mjumbewu* and a dataset called *niceplaces*. In this case, your dataset root will he `http://api.shareabouts.org/api/v1/mjumbewu/datasets/niceplaces/`.  In general, it will always be `http://<api server>/api/v1/<username>/datasets/<dataset slug>/`.
+  You will need your dataset root API URL for this step.  Suppose you are using an API server named *api.shareabouts.org* with a username *mjumbewu* and a dataset called *niceplaces*. In this case, your dataset root will he `http://api.shareabouts.org/api/v2/mjumbewu/datasets/niceplaces/`.  In general, it will always be `http://<api server>/api/v2/<username>/datasets/<dataset slug>/`.
 
   *DotCloud*
 
@@ -62,7 +62,7 @@ Should be all done!
 Deploying to WebFaction
 -----------------------
 
-0. Create a Django application using Django 1.4 and Python 2.7 in the control panel (Applications -> Add New Application). In this case an application called 'shareabouts_front' was created.
+0. Create a Django application using Django 1.5 and Python 2.7 in the control panel (Applications -> Add New Application). In this case an application called 'shareabouts_front' was created.
 
 1. SSH into your server and check out the project alongside wherever WebFaction created your `myproject` app:
 

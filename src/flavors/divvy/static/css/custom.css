@@ -232,7 +232,7 @@ label {
 .place-value-description {
   font-family: gtPressuraRegular, sans-serif;
 }
-.place-items-new-suggestion .place-item-description:after {
+.place-items .place-item-description:after {
   content: "I'd use this location for: ";
   float: left;
   color: #888;

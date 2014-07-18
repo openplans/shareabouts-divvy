@@ -1,4 +1,5 @@
 # Django settings for project project.
+import datetime
 import os.path
 
 HERE = os.path.abspath(os.path.join(os.path.dirname(__file__)))
@@ -60,10 +61,12 @@ MEDIA_URL = ''
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = './'
+COMPRESS_ROOT = STATIC_ROOT
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
+COMPRESS_URL = STATIC_URL
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -90,6 +93,18 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.Loader',
 #     'django.template.loaders.eggs.Loader',
 )
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.request",
+    "django.core.context_processors.static",
+    "django.core.context_processors.tz",
+
+    "project.context_processors.settings_context",
+)
+
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.debug",
@@ -190,6 +205,10 @@ LOGGING = {
         }
     },
     'handlers': {
+        'console': {
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'class': 'logging.StreamHandler',
+        },
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
@@ -206,6 +225,11 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'sa_web': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     }
 }
 
@@ -216,6 +240,9 @@ LOGGING = {
 
 env = os.environ
 
+if 'DEBUG' in env:
+    DEBUG = TEMPLATE_DEBUG = (env.get('DEBUG').lower() in ('true', 'on', 't', 'yes'))
+
 if 'SHAREABOUTS_FLAVOR' in env:
     SHAREABOUTS['FLAVOR'] = env.get('SHAREABOUTS_FLAVOR')
 if 'SHAREABOUTS_DATASET_ROOT' in env:
@@ -223,25 +250,45 @@ if 'SHAREABOUTS_DATASET_ROOT' in env:
 if 'SHAREABOUTS_DATASET_KEY' in env:
     SHAREABOUTS['DATASET_KEY'] = env.get('SHAREABOUTS_DATASET_KEY')
 
+
+if 'EMAIL_ADDRESS' in env:
+    EMAIL_ADDRESS = env['EMAIL_ADDRESS']
+if 'EMAIL_HOST' in env:
+    EMAIL_HOST = env['EMAIL_HOST']
+if 'EMAIL_PORT' in env:
+    EMAIL_PORT = env['EMAIL_PORT']
+if 'EMAIL_USERNAME' in env:
+    EMAIL_HOST_USER = env['EMAIL_USERNAME']
+if 'EMAIL_PASSWORD' in env:
+    EMAIL_HOST_PASSWORD = env['EMAIL_PASSWORD']
+if 'EMAIL_USE_TLS' in env:
+    EMAIL_USE_TLS = env['EMAIL_USE_TLS']
+
+if 'EMAIL_NOTIFICATIONS_BCC' in env:
+    EMAIL_NOTIFICATIONS_BCC = env['EMAIL_NOTIFICATIONS_BCC'].split(',')
+
+if all(['S3_MEDIA_BUCKET' in env, 'AWS_ACCESS_KEY' in env, 'AWS_SECRET_KEY' in env]):
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('S3_MEDIA_BUCKET')
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_KEY')
+
+    # Set the compress storage, but not the static files storage, to S3.
+    COMPRESS_ENABLED = os.environ.get('COMPRESS_ENABLED', str(not DEBUG)).lower() in ('true', 't')
+    COMPRESS_STORAGE = 'project.backends.S3BotoStorage'
+    COMPRESS_URL = '//%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+
+
+# For sitemaps and caching -- will be a new value every time the server starts
+LAST_DEPLOY_DATE = datetime.datetime.now().replace(second=0, microsecond=0).isoformat()
+
+
 if 'GOOGLE_ANALYTICS_ID' in env:
     GOOGLE_ANALYTICS_ID = env.get('GOOGLE_ANALYTICS_ID')
 if 'GOOGLE_ANALYTICS_DOMAIN' in env:
     GOOGLE_ANALYTICS_DOMAIN = env.get('GOOGLE_ANALYTICS_DOMAIN')
 
-if 'ADMINS' in env:
-    ADMINS = [
-        (admin.split('@')[0], admin)
-        for admin in os.environ.get('ADMINS', '').split(',')
-    ]
 
-EMAIL_SUBJECT_PREFIX = '[divvy] '
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = env.get('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_HOST_PASSWORD = env.get('EMAIL_HOST_PASSWORD', '')
-EMAIL_HOST_USER = env.get('EMAIL_HOST_USER', 'your_email@example.com')
-EMAIL_PORT = env.get('EMAIL_PORT', 587)
-EMAIL_USE_TLS = True
-SERVER_EMAIL = EMAIL_HOST_USER
+MAPQUEST_KEY = env.get('MAPQUEST_KEY', 'Fmjtd%7Cluur2g0bnl%2C25%3Do5-9at29u')
 
 ##############################################################################
 # Local settings overrides

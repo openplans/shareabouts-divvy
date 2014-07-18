@@ -6,14 +6,8 @@ Step 0: Create a Dataset
 
 You'll need an account on a Shareabouts API server.
 
-Log in to the API manager and create a new dataset. Remember the slug
-for your dataset, as you'll use it later. You will also need the API
-key for this dataset, which you can get from the "API Keys" tab of the
-manage UI.
-
-If you're using the OpenPlans API server, it's
-[api.shareabouts.org](http://api.shareabouts.org) and the API manager is
-[api.shareabouts.org/manage](http://api.shareabouts.org/manage).
+To use the OpenPlans hosted server, request a dataset and key via support@openplans.org. Your dataset will be on the OpenPlans API server,
+[data.shareabouts.org](http://data.shareabouts.org).
 
 Step 1: Create a flavor
 -----------------------
@@ -94,8 +88,8 @@ folder.
 ### Place Types
 
 Shareabouts can handle multiple types of Place. To set up the types
-syou're interested in, edit config.yml and add items to the `place_types` 
-section. Each Place value should match a location_type. 
+syou're interested in, edit config.yml and add items to the `place_types`
+section. Each Place value should match a location_type.
 
 Look at the config.yml for examples of styling Places. The properties of icons are as per the Leaflet docs, see http://leaflet.cloudmade.com/reference.html#icon
 But briefly:
@@ -127,9 +121,17 @@ The 'place' section of the config file starts like this:
     place:
       adding_supported: true
       title: The title of the form.
+      location_item_name: address
 
-If adding_supported is set to false, users cannot add places, and can
+If `adding_supported` is set to false, users cannot add places, and can
 only comment on or support the places you provide.
+
+The `location_item_name` attribute is used when the `geocoding_enabled` flag
+is set to true in the map config. When a user is adding a new place to the
+map, the location of the place will be reverse-geocoded every time they move
+the map. The result of that reverse-geocoding will be a string saved to the
+model in the `location_item_name` attribute. E.g., in the above example, the
+string will be saved in the `address` field of a place.
 
 Next you can have any number of input widgets to appear on the place
 adding form. These go in the *items* subsection, under *place*.
@@ -392,6 +394,34 @@ set the "external" property to "true".  For example:
 **NOTE** Do not include `<script>` tags in your pages. If you want to do custom
   scripting from within your flavor, add your scripts to the includes template
   (_templates/includes.html_).
+
+### Email Notifications
+
+You can turn on the ability for users to receive notifications after adding a place. In your configuration file, add the following:
+
+    notifications:
+      on_new_place: true
+
+By default, this will look for a *submitter_email* field on submitted places to notify. If you want to use a different field you can specify it with the `submitter_email_field` attribute. For example, the following will look for a *private_submitter_email* field:
+
+    notifications:
+      on_new_place: true
+      submitter_email_field: "private_submitter_email"
+
+If you choose to use email notifications, be sure to set the following in your environment:
+
+    EMAIL_ADDRESS
+    EMAIL_USERNAME
+    EMAIL_PASSWORD
+    EMAIL_HOST
+    EMAIL_PORT
+    EMAIL_USE_TLS
+
+Refer to your email provider's instructions on configuring a client for sending email with SMTP. Also, if you would like to also be notified of new places posted, you can add yourself to a BCC list for each email by setting the following variable to a comma-separated list of email addresses:
+
+    EMAIL_NOTIFICATIONS_BCC
+
+To change the subject or body of the email that is sent to users, create templates called *new_place_email_subject.txt* and *new_place_email_body.txt* respectively in your flavor's *templates/* folder. These should templates have the variables `request`, `config`, and `place` in the context. See the file *src/sa_web/templates/new_place_email_body.txt* for an example.
 
 ### Styling
 

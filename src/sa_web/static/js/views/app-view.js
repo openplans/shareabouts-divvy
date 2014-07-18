@@ -24,6 +24,21 @@ var Shareabouts = Shareabouts || {};
       'click .close-btn': 'onClickClosePanelBtn'
     },
     initialize: function(){
+      var self = this,
+          // Only include submissions if the list view is enabled (anything but false)
+          includeSubmissions = S.Config.flavor.app.list_enabled !== false,
+          placeParams = {
+            // NOTE: this is to simply support the list view. It won't
+            // scale well, so let's think about a better solution.
+            include_submissions: includeSubmissions
+          };
+
+      // Use the page size as dictated by the server by default, unless
+      // directed to do otherwise in the configuration.
+      if (S.Config.flavor.app.places_page_size) {
+        placeParams.page_size = S.Config.flavor.app.places_page_size;
+      }
+
       // Boodstrapped data from the page
       this.activities = this.options.activities;
       this.places = this.collection;
@@ -36,9 +51,47 @@ var Shareabouts = Shareabouts || {};
         $('#ajax-error-msg').hide();
       });
 
+      $('.list-toggle-btn').click(function(evt){
+        evt.preventDefault();
+        self.toggleListView();
+      });
+
+      // Globally capture clicks. If they are internal and not in the pass
+      // through list, route them through Backbone's navigate method.
+      $(document).on('click', 'a[href^="/"]', function(evt) {
+        var $link = $(evt.currentTarget),
+            href = $link.attr('href'),
+            url;
+
+        // Allow shift+click for new tabs, etc.
+        if ((href === '/' ||
+             href.indexOf('/place') === 0 ||
+             href.indexOf('/page') === 0) &&
+             !evt.altKey && !evt.ctrlKey && !evt.metaKey && !evt.shiftKey) {
+          evt.preventDefault();
+
+          // Remove leading slashes and hash bangs (backward compatablility)
+          url = href.replace(/^\//, '').replace('#!/', '');
+
+          // # Instruct Backbone to trigger routing events
+          self.options.router.navigate(url, {
+            trigger: true
+          });
+
+          return false;
+        }
+      });
+
       // Handle collection events
       this.collection.on('add', this.onAddPlace, this);
       this.collection.on('remove', this.onRemovePlace, this);
+
+      // On any route (/place or /page), hide the list view
+      this.options.router.bind('route', function(route) {
+        if (route !== 'showList' && this.listView && this.listView.isVisible()) {
+          this.hideListView();
+        }
+      }, this);
 
       // Only append the tools to add places (if supported)
       $('#map-container').append(Handlebars.templates['add-places'](this.options.placeConfig));
@@ -82,6 +135,62 @@ var Shareabouts = Shareabouts || {};
         placeTypes: this.options.placeTypes
       });
 
+      // Init the address search bar
+      this.geocodeAddressView = (new S.GeocodeAddressView({
+        el: '#geocode-address-bar',
+        router: this.options.router,
+        mapConfig: this.options.mapConfig
+      })).render();
+
+      // When the user chooses a geocoded address, the address view will fire
+      // a geocode event on the namespace. At that point we center the map on
+      // the geocoded location.
+      $(S).on('geocode', function(evt, locationData) {
+        self.mapView.zoomInOn(locationData.latLng);
+
+        if (self.isAddingPlace()) {
+          self.placeFormView.setLatLng(locationData.latLng);
+          self.placeFormView.setLocation(locationData);
+        }
+      });
+
+      // When the map center moves, the map view will fire a mapmoveend event
+      // on the namespace. If the move was the result of the user dragging, a
+      // mapdragend event will be fired.
+      //
+      // If the user is adding a place, we want to take the opportunity to
+      // reverse geocode the center of the map, if geocoding is enabled. If
+      // the user is doing anything else, we just want to clear out any text
+      // that's currently set in the address search bar.
+      $(S).on('mapdragend', function(evt) {
+        if (self.isAddingPlace()) {
+          self.conditionallyReverseGeocode();
+        } else if (self.geocodeAddressView) {
+          self.geocodeAddressView.setAddress('');
+        }
+      });
+
+      // After reverse geocoding, the map view will fire a reversegeocode
+      // event. This should only happen when adding a place while geocoding
+      // is enabled.
+      $(S).on('reversegeocode', function(evt, locationData) {
+        var locationString = Handlebars.templates['location-string'](locationData);
+        self.geocodeAddressView.setAddress(locationString.trim());
+        self.placeFormView.setLatLng(locationData.latLng);
+        self.placeFormView.setLocation(locationData);
+      });
+
+
+      // List view is enabled by default (undefined) or by enabling it
+      // explicitly. Set it to a falsey value to disable activity.
+      if (_.isUndefined(S.Config.flavor.app.list_enabled) ||
+        S.Config.flavor.app.list_enabled) {
+          this.listView = new S.PlaceListView({
+            el: '#list-container',
+            collection: this.collection
+          }).render();
+      }
+
       // Cache panel elements that we use a lot
       this.$panel = $('#content');
       this.$panelContent = $('#content article');
@@ -93,6 +202,9 @@ var Shareabouts = Shareabouts || {};
       // with utmost awesomeness.
       this.mapView.map.on('movestart', this.onMapMoveStart, this);
       this.mapView.map.on('moveend', this.onMapMoveEnd, this);
+      // For knowing if the user has moved the map after opening the form.
+      this.mapView.map.on('dragend', this.onMapDragEnd, this);
+
 
       // This is the "center" when the popup is open
       this.offsetRatio = {x: 0.2, y: 0.0};
@@ -104,16 +216,89 @@ var Shareabouts = Shareabouts || {};
       // Show tools for adding data
       this.showAddButton();
       this.showCenterPoint();
+
+      // Load places from the API
+      this.loadPlaces(placeParams);
+
+      // Fetch the first page of activity
+      this.activities.fetch({reset: true});
     },
+
+    isAddingPlace: function(model) {
+      return this.$panel.is(":visible") && this.$panel.hasClass('place-form');
+    },
+    loadPlaces: function(placeParams) {
+      var self = this,
+          $progressContainer = $('#map-progress'),
+          $currentProgress = $('#map-progress .current-progress'),
+          pageSize,
+          totalPages,
+          pagesComplete = 0;
+
+      this.collection.fetchAllPages({
+        remove: false,
+        // Check for a valid location type before adding it to the collection
+        validate: true,
+        data: placeParams,
+
+        success: function() {
+          // Sort the list view after all of the pages have been fetched
+          if (self.listView) {
+            self.listView.sort();
+            self.listView.updateSortLinks();
+          }
+        },
+
+        // Only do this for the first page...
+        pageSuccess: _.once(function(collection, data) {
+          pageSize = data.features.length;
+          totalPages = Math.ceil(data.metadata.length / pageSize);
+
+          if (data.metadata.next) {
+            $progressContainer.show();
+          }
+        }),
+
+        // Do this for every page...
+        pageComplete: function() {
+          var percent;
+
+          pagesComplete++;
+          percent = (pagesComplete/totalPages*100);
+          $currentProgress.width(percent + '%');
+
+          if (pagesComplete === totalPages) {
+            _.delay(function() {
+              $progressContainer.hide();
+            }, 2000);
+          }
+        }
+      });
+    },
+
     // Get the center of the map
     getCenter: function() {
       return this.mapView.map.getCenter();
+    },
+    setPlaceFormViewLatLng: function(centerLatLng) {
+      if (this.placeFormView) {
+        this.placeFormView.setLatLng(centerLatLng);
+      }
     },
     onMapMoveStart: function(evt) {
       this.$centerpoint.addClass('dragging');
     },
     onMapMoveEnd: function(evt) {
       this.$centerpoint.removeClass('dragging');
+
+      // Never set the placeFormView's latLng until the user does it with a
+      // drag event (below)
+      if (this.placeFormView && this.placeFormView.center) {
+        this.setPlaceFormViewLatLng(this.getCenter());
+      }
+    },
+    onMapDragEnd: function(evt) {
+      this.setPlaceFormViewLatLng(this.getCenter());
     },
     onClickAddPlaceBtn: function(evt) {
       evt.preventDefault();
@@ -137,13 +322,21 @@ var Shareabouts = Shareabouts || {};
           router: this.options.router,
           defaultPlaceTypeName: this.options.defaultPlaceTypeName,
           placeTypes: this.options.placeTypes,
-          placeConfig: this.options.placeConfig
+          placeConfig: this.options.placeConfig,
+          userToken: this.options.userToken
         });
 
         this.$panel.removeClass().addClass('place-form');
         this.showPanel(this.placeFormView.render().$el);
         this.showNewPin();
         this.hideAddButton();
+
+        this.conditionallyReverseGeocode();
+      }
+    },
+    conditionallyReverseGeocode: function() {
+      if (this.options.mapConfig.geocoding_enabled) {
+        this.mapView.reverseGeocodeMapCenter();
       }
     },
     onRemovePlace: function(model) {
@@ -180,13 +373,16 @@ var Shareabouts = Shareabouts || {};
       // Called by the router
       this.collection.add({});
     },
-    viewPlace: function(model, zoom) {
+    viewPlace: function(model, responseId, zoom) {
       var self = this,
+          includeSubmissions = S.Config.flavor.app.list_enabled !== false,
+          // will be "mobile" or "desktop", as defined in default.css
+          layout = window.getComputedStyle(document.body,':after').getPropertyValue('content'),
           onPlaceFound, onPlaceNotFound, modelId;
 
       onPlaceFound = function(model) {
         var map = self.mapView.map,
-            layer, center, placeDetailView;
+            layer, center, placeDetailView, $responseToScrollTo;
 
         // If this model is a duplicate of one that already exists in the
         // places collection, it may not correspond to a layerView. For this
@@ -197,24 +393,45 @@ var Shareabouts = Shareabouts || {};
 
         layer = self.mapView.layerViews[model.cid].layer;
         placeDetailView = self.getPlaceDetailView(model);
-        center = layer.getLatLng ? layer.getLatLng() : layer.getBounds().getCenter();
+
+        if (layer) {
+          center = layer.getLatLng ? layer.getLatLng() : layer.getBounds().getCenter();
+        }
 
         self.$panel.removeClass().addClass('place-detail place-detail-' + model.id);
-        self.showPanel(placeDetailView.render().$el);
+        self.showPanel(placeDetailView.render().$el, !!responseId);
         self.hideNewPin();
         self.destroyNewModels();
         self.hideCenterPoint();
         self.hideAddButton();
 
-        if (zoom) {
-          if (layer.getLatLng) {
-            map.setView(center, map.getMaxZoom()-1, {animate: true});
-          } else {
-            map.fitBounds(layer.getBounds());
-          }
+        if (layer) {
+          if (zoom) {
+            if (layer.getLatLng) {
+              map.setView(center, map.getMaxZoom()-1, {animate: true});
+            } else {
+              map.fitBounds(layer.getBounds());
+            }
 
-        } else {
-          map.panTo(center, {animate: true});
+          } else {
+            map.panTo(center, {animate: true});
+          }
+        }
+
+        if (responseId) {
+          // get the element based on the id
+          $responseToScrollTo = placeDetailView.$el.find('[data-response-id="'+ responseId +'"]');
+
+          // call scrollIntoView()
+          if ($responseToScrollTo.length > 0) {
+            if (layout === 'desktop') {
+              // For desktop, the panel content is scrollable
+              self.$panelContent.scrollTo($responseToScrollTo, 500);
+            } else {
+              // For mobile, it's the window
+              $(window).scrollTo($responseToScrollTo, 500);
+            }
+          }
         }
 
         // Focus the one we're looking
@@ -242,8 +459,13 @@ var Shareabouts = Shareabouts || {};
       // Otherwise, fetch and use the result.
       } else {
         this.places.fetchById(modelId, {
+          // Check for a valid location type before adding it to the collection
+          validate: true,
           success: onPlaceFound,
-          error: onPlaceNotFound
+          error: onPlaceNotFound,
+          data: {
+            include_submissions: includeSubmissions
+          }
         });
       }
     },
@@ -262,7 +484,7 @@ var Shareabouts = Shareabouts || {};
       this.hideCenterPoint();
       this.hideAddButton();
     },
-    showPanel: function(markup) {
+    showPanel: function(markup, preventScrollToTop) {
       var map = this.mapView.map;
 
       this.unfocusAllPlaces();
@@ -270,13 +492,21 @@ var Shareabouts = Shareabouts || {};
       this.$panelContent.html(markup);
       this.$panel.show();
 
-      this.$panelContent.scrollTop(0);
-      // Scroll to the top of window when showing new content on mobile. Does
-      // nothing on desktop.
-      window.scrollTo(0, 0);
+      if (!preventScrollToTop) {
+        // will be "mobile" or "desktop", as defined in default.css
+        var layout = window.getComputedStyle(document.body,':after').getPropertyValue('content');
+        if (layout === 'desktop') {
+          // For desktop, the panel content is scrollable
+          this.$panelContent.scrollTo(0, 0);
+        } else {
+          // Scroll to the top of window when showing new content on mobile. Does
+          // nothing on desktop. (Except when embedded in a scrollable site.)
+          window.scrollTo(0, 0);
+        }
+      }
 
       $('body').addClass('content-visible');
-      map.invalidateSize({ pan:false });
+      map.invalidateSize({ animate:true, pan:true });
 
       $(S).trigger('panelshow', [this.options.router, Backbone.history.getFragment()]);
       S.Util.log('APP', 'panel-state', 'open');
@@ -303,7 +533,7 @@ var Shareabouts = Shareabouts || {};
       this.unfocusAllPlaces();
       this.$panel.hide();
       $('body').removeClass('content-visible');
-      map.invalidateSize({ pan:false });
+      map.invalidateSize({ animate:true, pan:true });
 
       S.Util.log('APP', 'panel-state', 'closed');
     },
@@ -327,6 +557,29 @@ var Shareabouts = Shareabouts || {};
     },
     render: function() {
       this.mapView.render();
+    },
+    showListView: function() {
+      // Re-sort if new places have come in
+      this.listView.sort();
+      // Show
+      this.listView.$el.addClass('is-exposed');
+      $('.show-the-list').addClass('is-visuallyhidden');
+      $('.show-the-map').removeClass('is-visuallyhidden');
+    },
+    hideListView: function() {
+      this.listView.$el.removeClass('is-exposed');
+      $('.show-the-list').removeClass('is-visuallyhidden');
+      $('.show-the-map').addClass('is-visuallyhidden');
+    },
+    toggleListView: function() {
+      if (this.listView.isVisible()) {
+        this.viewMap();
+        this.hideListView();
+        this.options.router.navigate('');
+      } else {
+        this.showListView();
+        this.options.router.navigate('list');
+      }
     }
   });
 }(Shareabouts, jQuery, Shareabouts.Util.console));
