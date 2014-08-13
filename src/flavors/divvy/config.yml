@@ -16,7 +16,9 @@ app:
 map:
   geolocation_enabled: true
   geolocation_onload: false
+
   geocoding_enabled: true
+  geocode_field_label: _(Enter an address...)
   options:
     center:
       lat: 41.8819
